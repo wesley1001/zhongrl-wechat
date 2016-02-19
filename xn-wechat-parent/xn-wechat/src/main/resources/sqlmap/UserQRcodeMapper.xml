@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xn.wechat.activity.mapper.UserQRcodeMapper">
+
+
+	<insert id="addUserQRcode" parameterType="cn.xn.wechat.activity.model.UserQRcode">
+		INSERT INTO
+		t_activity_fans_qrcode(codeId,userId,startDate,endDate,qrCodeUrl,eggs_user_id)
+		VALUES(#{codeId,
+		jdbcType=VARCHAR},#{userId},#{startDate},#{endDate},#{qrCodeUrl,jdbcType=VARCHAR},
+		#{eggUserId})
+	</insert>
+
+
+
+	<select id="getUserQRcodeByMap" parameterType="map"
+		resultType="cn.xn.wechat.activity.model.UserQRcode">
+		SELECT codeId,userId,startDate,endDate,qrCodeUrl,eggs_user_id as
+		eggUserId
+		FROM t_activity_fans_qrcode
+		<where>
+			1=1
+			<if test="userId!=null">
+				AND userId=#{userId}
+			</if>
+			<if test="eggUserId!=null and eggUserId>0">
+				AND eggs_user_id=#{eggUserId}
+			</if>
+		</where>
+	</select>
+
+</mapper>

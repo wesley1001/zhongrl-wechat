@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "./mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <setting name="cacheEnabled" value="false" />
+        <setting name="useGeneratedKeys" value="true" />
+        <setting name="defaultExecutorType" value="REUSE" />
+    </settings>
+    
+  	<typeAliases>
+		<typeAlias type="cn.xn.wechat.web.model.ClickNumber" alias="clickNumber"/>
+		<typeAlias type="cn.xn.wechat.web.model.WechatConfig" alias="wechatConfig"/>
+		<typeAlias type="cn.xn.wechat.web.model.WeChatQrCode" alias="weChatQrCode"/>
+		<typeAlias type="cn.xn.wechat.web.model.WechatMenu" alias="wechatMenu"/>
+		<typeAlias type="cn.xn.wechat.web.model.ReplyMessage" alias="replyMessage"/>
+		<typeAlias type="cn.xn.wechat.web.model.BiScanCode" alias="biScanCode"/>
+		<typeAlias type="cn.xn.wechat.web.model.KeyWord" alias="keyWord"/>
+		<typeAlias type="cn.xn.wechat.web.model.Wechat" alias="wechat"/>
+		<typeAlias type="cn.xn.wechat.web.model.PushMessageLog" alias="pushMessageLog"/>
+		<typeAlias type="cn.xn.wechat.activity.model.RateToken" alias="rateToken"/>
+		<typeAlias type="cn.xn.wechat.activity.model.LMOrder" alias="lmOrder"/>
+		<typeAlias type="cn.xn.wechat.activity.model.LmHttpLog" alias="lmHttpLog"/>
+		<typeAlias type="cn.xn.wechat.activity.model.EggsQRcode" alias="eggsQRcode"/>
+	</typeAliases>
+	
+    <plugins>
+        <plugin interceptor="cn.xn.freamwork.support.mybatis.MySQLPaginationInterceptor">
+        </plugin>
+    </plugins>
+    <mappers>
+        <mapper resource="sqlmap/ActivityMapper.xml"/>
+        <mapper resource="sqlmap/WeChatQrCodeMapper.xml"/>
+        <mapper resource="sqlmap/WeChatGetMaterialMapper.xml"/>
+        <mapper resource="sqlmap/WechatConfigMapper.xml"/>
+        <mapper resource="sqlmap/UserInfoMapper.xml"/>
+        
+         <mapper resource="sqlmap/WechatActivityMapper.xml"/>
+         <mapper resource="sqlmap/ChangeRecordMapper.xml"/>
+         <mapper resource="sqlmap/PrizeInfoMapper.xml"/>
+         <mapper resource="sqlmap/FansUserInfoMapper.xml"/>
+         <mapper resource="sqlmap/UserQRcodeMapper.xml"/>
+         <mapper resource="sqlmap/ScanRecordMapper.xml"/>
+         <mapper resource="sqlmap/TicketInfoMapper.xml"/>
+         <mapper resource="sqlmap/EggsMapper.xml"/>
+    </mappers>  
+</configuration>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>钱罐子好声音</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<meta name="apple-mobile-web-app-capable" content="yes" /><!-- 删除苹果默认的工具栏和菜单栏 -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" /><!-- 设置苹果工具栏颜色 -->
+	<meta name="format-detection" content="telphone=no, email=no" /><!-- 忽略页面中的数字识别为电话，忽略email识别 -->
+	<link rel="stylesheet" href="css/style2.pack.css?v=14155dc7f9be1cb51b2c149d88d72fe8"/>
+</head>
+<body>
+	<section>
+		<div class="wrap main-bg2">
+			<h3 class="tit-h3"></h3>
+			<div class="camera-box-side">
+				<div class="camera-box">
+					<div class="camera-stadyby">
+						<input type="file" class="file-picker" accept="image/jpeg"/>
+					</div>
+					<div class="camera-active dn">
+						<div class="core-mask">
+							<div class="core-circle">
+								<img class="cover j_cover_thumb" style="display:none" />
+							</div>
+							<canvas id="pho_cut" width="240" height="240" style="display:none"></canvas>
+						</div>
+					</div>
+					<span class="sm-mic"></span>
+				</div>
+			</div>
+			<div class="tips">拖动调整图片</div>
+			<div class="get-btn">
+				<button id="upload"><img src="images/btn-sure.png" /></button>
+				<button><input type="file" name="file" class="btn-onload" accept="image/jpeg"/><img src="images/btn-reset.png" /></button>
+			</div>
+		</div>
+	</section>
+	<script src="./js/xn.base.pack.js?v=73ae08eac31b3a5178ca0c6724e52f71"></script>
+	<script src="./js/xn.plibs.pack.js?v=6cd074f64332dbf57b51ffb63f7a5526"></script>
+	<script>
+		define('main', function(require, exports, module){
+			require.async('http://res.wx.qq.com/open/js/jweixin-1.0.0.js', function(wx){
+				$.ajax({
+					type : "post",
+					dataType : 'json',
+					url : 'http://wx.xiaoniuapp.com/xn-wechat-activity/activity/signatureVerification',
+					data : {
+						url : location.href.replace(/#.+$/, '')
+					},
+					success : function(ret){
+						if(ret && ret.code == 0){
+							wx.config({
+								//debug : true, //调试
+								appId : ret.data.appId,
+								timestamp : ret.data.timestamp,
+								nonceStr : ret.data.noncestr,
+								signature : ret.data.signature,
+								jsApiList : ['hideOptionMenu']
+							});
+							wx.ready(function(){
+								wx.hideOptionMenu();
+							});
+						}
+					}
+				})
+			});
+			var file = require('file');		
+			var exports = {
+				init : function(){
+					file.init({
+						canvas : 'canvas',
+						file : 'input[type=file]',
+						param : {
+							format : 'image/jpeg',
+							quality : 0.8
+						},
+						background : '',
+						onChange : function(){
+							var canvas = $('canvas');
+							canvas.show();
+							file.canvas = canvas[0];
+							file.ctx = file.canvas.getContext('2d');
+							file.update();
+							//展示
+							$(".camera-active").removeClass("dn");
+							$(".camera-stadyby").addClass("dn");
+						}
+					});
+				}
+			};
+
+			$('input').change(function(){
+				exports.init();
+			});
+			$("#upload").on("touchstart",function(){
+				file.encode(function(base64){
+					$.ajax({
+						dataType : 'json',
+						type : 'post',
+						url : 'http://wx.xiaoniuapp.com/xn-wechat-activity/activity/uploadImage',
+						data : {
+							'image' : base64
+						},
+						success : function(res){
+							if(res.code == 0){
+								//获取随机页:四舍五入（随机数*范围）
+								var allPageSize = 32;
+								var pageIndex = Math.round(Math.random()*allPageSize);
+								pageIndex = (pageIndex >= 32)?10:pageIndex;
+								window.location.href="http://wx.xiaoniuapp.com/xn-wechat-activity/goodvoice/index.html?mysrc=" + res.data.imageUrl + "&pageIndex=" + pageIndex;
+							}
+						},
+						error : function(){
+							alert('图片上传失败');
+						}
+					})
+				})
+			});
+		})
+		seajs.use('main', function(main){});
+	</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xn.wechat.activity.mapper.PrizeInfoMapper">
+
+	<sql id="base_Column_List">
+		id as prizeId, prize_name as prizeName, buy_total as buyTotal, buy_material as buyMaterial,
+		buyed_total as buyedTotal, image_url as imageUrl, create_date as
+		createDate, update_date as updateDate,
+		prize_description as prizeDesc,
+		status,typeId,isVirtual
+	</sql>
+
+	<select id="findPrizeInfoList" resultType="cn.xn.wechat.activity.model.PrizeInfo"
+		parameterType="java.util.HashMap">
+		select
+		<include refid="base_Column_List" />
+		from t_activity_fans_prizeinfo
+		<where>
+			1=1
+			<if test="productIds != null">
+				AND id in
+				<foreach collection="productIds" index="index" item="productId"
+					open="(" separator="," close=")">
+					#{productId}
+				</foreach>
+			</if>
+			<if test="multipleStates != null">
+				and status in
+				<foreach collection="multipleStates" index="index" item="states"
+					open="(" separator="," close=")">
+					#{states}
+				</foreach>
+			</if>
+			<if test="isVirtual != null and isVirtual>0 ">
+				and isVirtual=#{isVirtual}
+			</if>
+		</where>
+		ORDER BY show_index ASC
+	</select>
+
+	<select id="getPrizeInfoById" resultType="cn.xn.wechat.activity.model.PrizeInfo"
+		parameterType="string">
+		select
+		<include refid="base_Column_List" />
+		from t_activity_fans_prizeinfo where id=#{prizeId}
+	</select>
+	
+	
+	<select id="getPrizeInfoLockById" resultType="cn.xn.wechat.activity.model.PrizeInfo"
+		parameterType="string">
+		select
+		<include refid="base_Column_List" />
+		from t_activity_fans_prizeinfo where id=#{prizeId} FOR UPDATE
+	</select>
+
+	<update id="updatePrizeInfo" parameterType="cn.xn.wechat.activity.model.PrizeInfo">
+		update t_activity_fans_prizeinfo
+		<set>
+			<if test="status != null">
+				status = #{status},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="buyMaterial != null">
+				buy_material = #{buyMaterial},
+			</if>
+			<if test="buyedTotal != null">
+				buyed_total = #{buyedTotal},
+			</if>
+		</set>
+		<where>
+			<if test="prizeId != null">
+				id=#{prizeId}
+			</if>
+		</where>
+	</update>
+ 
+</mapper>

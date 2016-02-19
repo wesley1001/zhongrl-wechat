@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xn.wechat.web.mapper.WechatConfigMapper" >
+
+  <parameterMap type="wechatMenu" id="wechatMenu" />
+  <parameterMap type="wechatConfig" id="wechatConfig" />
+  <parameterMap type="replyMessage" id="replyMessage" />
+  <parameterMap type="keyWord" id="keyWord" />
+  <parameterMap type="wechat" id="wechat" />
+  <parameterMap type="pushMessageLog" id="pushMessageLog" />
+  <!-- <resultMap id="replyMessageMap" type="cn.xn.wechat.web.model.ReplyMessage">
+		<id column="Id" property="id" jdbcType="int" />
+		<result column="name" property="wechatName" jdbcType="VARCHAR" />
+		<result column="type" property="messageType" jdbcType="VARCHAR" />
+		<result column="channel" property="channel" jdbcType="VARCHAR" />
+		<result column="text" property="text" jdbcType="VARCHAR" />
+		<result column="Title" property="Title" jdbcType="VARCHAR" />
+		<result column="Description" property="Description" jdbcType="VARCHAR" />
+		<result column="PicUrl" property="PicUrl" jdbcType="VARCHAR" />
+		<result column="Url" property="Url" jdbcType="VARCHAR" />
+		<result column="Url" property="Url" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="VARCHAR" />
+	</resultMap> -->
+  <select id="getWeChat" resultType="wechatConfig" parameterType="string">
+  		SELECT 
+  			Id,appId,appSecret,wechatName,wechatType,wecahtStatus 
+  		FROM wechat_details 
+  		 	WHERE wechatType =  #{wechatType, jdbcType=VARCHAR}
+  </select>
+  
+  <update id="updateWechatMenu" parameterType="wechatMenu">
+  		UPDATE wechat_menu SET json=#{json, jdbcType=VARCHAR}  WHERE type=#{type, jdbcType=VARCHAR}
+  </update>
+  
+  <select id="getWechatMenu" resultType="wechatConfig" parameterType="wechatMenu">
+  		SELECT 
+  			json
+  		FROM wechat_menu 
+  		 	WHERE wechatType =  #{wechatType, jdbcType=VARCHAR}
+  </select>
+  
+  <insert id="saveWechatConfig" parameterMap="wechatConfig">
+  		INSERT INTO wechat_details 
+		  		(appId,
+		  		appSecret,
+		  		wechatName,
+		  		wechatType,
+		  		wecahtStatus
+		  		) 
+		  VALUES
+		  		(
+		  		#{appId, jdbcType=VARCHAR},
+		  		#{appSecret, jdbcType=VARCHAR},
+		  		#{wechatName, jdbcType=VARCHAR},
+		  		#{wechatType, jdbcType=VARCHAR},
+		  		#{wecahtStatus, jdbcType=VARCHAR}
+		  		)
+  </insert>
+  
+  <select id="getWechatConfig" resultType="wechatConfig">
+  		SELECT  Id,
+  			    appId,
+		  		appSecret,
+		  		wechatName,
+		  		wechatType,
+		  		wecahtStatus
+  		FROM wechat_details  ORDER BY Id DESC
+  </select>
+  <select id="getWechatConfigCount" resultType="int">
+  		SELECT COUNT(1) FROM (SELECT  Id,
+  			    appId,
+		  		appSecret,
+		  		wechatName,
+		  		wechatType,
+		  		wecahtStatus
+  		FROM wechat_details) wechat_details_count 
+  </select>
+  
+  <insert id="saveReplyMessage" parameterMap="replyMessage">
+  	INSERT INTO wechat_replymessage
+  	<trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="wechatName != null" >
+        	name,
+      </if>
+      <if test="messageType != null" >
+        	type,
+      </if>
+      <if test="channel != null" >
+        	channel,
+      </if>
+       <if test="text != null" >
+        	text,
+      </if>
+       <if test="Title != null" >
+        	Title,
+      </if>
+       <if test="Description != null" >
+        	Description,
+      </if>
+      <if test="PicUrl != null" >
+       		PicUrl,
+      </if>
+      <if test="Url != null" >
+        	Url,
+      </if>
+      <if test="createTime != null" >
+	       	 createTime,
+	  </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      <if test="wechatName != null" >
+	        	#{wechatName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="messageType != null" >
+	      		#{messageType,jdbcType=VARCHAR},
+	      </if>
+	      <if test="channel != null" >
+	        	#{channel,jdbcType=VARCHAR},
+	      </if>
+	       <if test="text != null" >
+	        	#{text,jdbcType=VARCHAR},
+	      </if>
+	       <if test="Title != null" >
+	        	#{Title,jdbcType=VARCHAR},
+	      </if>
+	       <if test="Description != null" >
+	       		#{Description,jdbcType=VARCHAR},
+	      </if>
+	      <if test="PicUrl != null" >
+	        	#{PicUrl,jdbcType=VARCHAR},
+	      </if>
+	      <if test="Url != null" >
+	        	#{Url,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createTime != null" >
+	       	 #{createTime,jdbcType=VARCHAR},
+	      </if>
+    </trim>
+  </insert>
+  
+  <select id="replyMessages" resultType="replyMessage" parameterType="map">
+	  	SELECT Id,name AS wechatName,type AS messageType,channel,text,Title,Description,PicUrl,Url,createTime 
+	  	FROM wechat_replymessage ORDER BY Id DESC limit  #{page,jdbcType=INTEGER}, #{pageSize,jdbcType=INTEGER}
+  </select>
+  
+  <select id="replyMessagesCount" resultType="int">
+  		SELECT COUNT(1) FROM (SELECT Id,name AS wechatName,type AS messageType,channel,text,Title,Description,PicUrl,Url,createTime 
+	  	FROM wechat_replymessage ORDER BY Id DESC) AS number
+  </select>
+  
+  <delete id="deleteReplyMessage" parameterType="int">
+  		DELETE FROM wechat_replymessage WHERE Id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <delete id="deleteKeyWord" parameterType="int">
+  		DELETE FROM t_keyword WHERE Id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <select id="getReplyMessage" resultType="replyMessage">
+	  	SELECT Id,name AS wechatName,type AS messageType,channel,text,Title,Description,PicUrl,Url,createTime 
+	  	FROM wechat_replymessage WHERE Id = #{id}
+  </select>
+  
+  <update id="updateReplyMessage" parameterType="int">
+    UPDATE wechat_replymessage
+    <set >
+      <if test="wechatName != null" >
+	        	name = #{wechatName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="messageType != null" >
+	      		type = #{messageType,jdbcType=VARCHAR},
+	      </if>
+	      <if test="channel != null" >
+	        	channel = #{channel,jdbcType=VARCHAR},
+	      </if>
+	       <if test="text != null" >
+	        	text = #{text,jdbcType=VARCHAR},
+	      </if>
+	       <if test="Title != null" >
+	        	Title = #{Title,jdbcType=VARCHAR},
+	      </if>
+	       <if test="Description != null" >
+	       		Description = #{Description,jdbcType=VARCHAR},
+	      </if>
+	      <if test="PicUrl != null" >
+	        	PicUrl = #{PicUrl,jdbcType=VARCHAR},
+	      </if>
+	      <if test="Url != null" >
+	        	Url = #{Url,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createTime != null" >
+	       	 createTime = #{createTime,jdbcType=VARCHAR},
+	      </if>
+    </set>
+    WHERE Id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="statisticalScanCodes" resultType="biScanCode" parameterType="map">
+  		SELECT count(1) AS number,if(EventKey='','wechat',EventKey)  AS qrCodeName FROM wechat_qrcode_event group by EventKey 
+  		ORDER BY Id DESC limit  #{page,jdbcType=INTEGER}, #{pageSize,jdbcType=INTEGER}
+  </select>
+  
+   <select id="statisticalScanCodeCount" resultType="int">
+  		SELECT COUNT(1) FROM (SELECT count(1) AS number,if(EventKey='','wechat',EventKey)  AS qrCodeName FROM wechat_qrcode_event group by EventKey 
+  		ORDER BY Id DESC) AS number
+  </select>
+  
+  <select id="getKeyWords" resultType="keyWord" parameterType="map">
+  		SELECT * FROM t_keyword WHERE 1 = 1
+  		<if test="wechatName!=null and wechatName!=''">
+  			AND wechatName=#{wechatName,jdbcType=VARCHAR} 
+  		</if>
+  		ORDER BY Id DESC limit  #{page,jdbcType=INTEGER}, #{pageSize,jdbcType=INTEGER}
+  </select>
+  
+  <select id="getKeyNames" resultType="keyWord" parameterType="map">
+ 		SELECT * FROM t_keyword WHERE 1=1
+ 		<if test="wechatName!=null and wechatName!=''">
+ 			 and wechatName=#{wechatName,jdbcType=VARCHAR} 
+ 		</if>
+ 		<if test="content!=null and content!=''">
+ 			 and keyName = #{content,jdbcType=VARCHAR} 
+ 		</if>
+ 		ORDER BY Id DESC
+ </select>
+  
+   <select id="getKeyWord" resultType="keyWord" parameterType="int">
+  		SELECT * FROM t_keyword WHERE Id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <select id="getKeyWordCount" resultType="int" parameterType="map">
+  		SELECT COUNT(1) FROM (SELECT * FROM t_keyword WHERE wechatName=#{wechatName,jdbcType=VARCHAR} ORDER BY Id DESC) as number
+  </select>
+  
+  <insert id="saveKeyWord" parameterMap="keyWord">
+  	INSERT INTO t_keyword
+  	<trim prefix="(" suffix=")" suffixOverrides="," >
+  	  <if test="wechatName != null" >
+        	wechatName,
+      </if>
+      <if test="keyName != null" >
+        	keyName,
+      </if>
+      <if test="type != null" >
+        	type,
+      </if>
+       <if test="text != null" >
+        	text,
+      </if>
+       <if test="Title != null" >
+        	Title,
+      </if>
+       <if test="Description != null" >
+        	Description,
+      </if>
+      <if test="PicUrl != null" >
+       		PicUrl,
+      </if>
+      <if test="Url != null" >
+        	Url,
+      </if>
+      <if test="createTime != null" >
+	       	 createTime,
+	  </if>
+	  <if test="imageName != null" >
+       		imageName,
+      </if>
+      <if test="media != null" >
+        	media,
+      </if>
+      <if test="times != null" >
+	       	 times,
+	  </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+    	<if test="wechatName != null" >
+	        	#{wechatName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="keyName != null" >
+	        	#{keyName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="type != null" >
+	      		#{type,jdbcType=VARCHAR},
+	      </if>
+	       <if test="text != null" >
+	        	#{text,jdbcType=VARCHAR},
+	      </if>
+	       <if test="Title != null" >
+	        	#{Title,jdbcType=VARCHAR},
+	      </if>
+	       <if test="Description != null" >
+	       		#{Description,jdbcType=VARCHAR},
+	      </if>
+	      <if test="PicUrl != null" >
+	        	#{PicUrl,jdbcType=VARCHAR},
+	      </if>
+	      <if test="Url != null" >
+	        	#{Url,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createTime != null" >
+	       	 #{createTime,jdbcType=VARCHAR},
+	      </if>
+	       <if test="imageName != null" >
+       		 #{createTime,jdbcType=VARCHAR},
+	      </if>
+	      <if test="media != null" >
+	        	#{media,jdbcType=VARCHAR},
+	      </if>
+	      <if test="times != null" >
+		       	 #{times,jdbcType=VARCHAR},
+		  </if>
+    </trim>
+  </insert>
+  
+   <update id="updateKeyWord" parameterType="keyWord">
+    UPDATE t_keyword
+    <set >
+      	<if test="wechatName != null" >
+	        	wechatName = #{wechatName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="keyName != null" >
+	        	keyName = #{keyName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="type != null" >
+	      		type = #{type,jdbcType=VARCHAR},
+	      </if>
+	       <if test="text != null" >
+	        	text = #{text,jdbcType=VARCHAR},
+	      </if>
+	       <if test="Title != null" >
+	        	Title = #{Title,jdbcType=VARCHAR},
+	      </if>
+	       <if test="Description != null" >
+	       		Description = #{Description,jdbcType=VARCHAR},
+	      </if>
+	      <if test="PicUrl != null" >
+	        	PicUrl = #{PicUrl,jdbcType=VARCHAR},
+	      </if>
+	      <if test="Url != null" >
+	        	Url = #{Url,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createTime != null" >
+	       	 createTime = #{createTime,jdbcType=VARCHAR},
+	      </if>
+    </set>
+    WHERE Id = #{Id,jdbcType=INTEGER}
+  </update>
+  
+  <insert id="saveWechatUserDetails" parameterType="wechat">
+  		INSERT INTO t_wechat
+  	<trim prefix="(" suffix=")" suffixOverrides="," >
+  	  <if test="openid != null" >
+        	openid,
+      </if>
+      <if test="nickname != null" >
+        	nickname,
+      </if>
+      <if test="sex != null" >
+        	sex,
+      </if>
+       <if test="city != null" >
+        	city,
+      </if>
+       <if test="country != null" >
+        	country,
+      </if>
+       <if test="headimgurl != null" >
+        	headimgurl,
+      </if>
+      <if test="unionid != null" >
+       		unionid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+    	<if test="openid != null" >
+	        	#{openid,jdbcType=VARCHAR},
+	      </if>
+	      <if test="nickname != null" >
+	        	#{nickname,jdbcType=VARCHAR},
+	      </if>
+	      <if test="sex != null" >
+	      		#{sex,jdbcType=VARCHAR},
+	      </if>
+	       <if test="city != null" >
+	        	#{city,jdbcType=VARCHAR},
+	      </if>
+	       <if test="country != null" >
+	        	#{country,jdbcType=VARCHAR},
+	      </if>
+	       <if test="headimgurl != null" >
+	       		#{headimgurl,jdbcType=VARCHAR},
+	      </if>
+	      <if test="unionid != null" >
+	        	#{unionid,jdbcType=VARCHAR},
+	      </if>
+    </trim>
+  </insert>
+  <update id="updateWechatUserDetails" parameterMap="wechat">
+    UPDATE t_wechat
+    <set >
+      <if test="openid != null" >
+	        	openid = #{openid,jdbcType=VARCHAR},
+	      </if>
+	      <if test="nickname != null" >
+	      		nickname = #{nickname,jdbcType=VARCHAR},
+	      </if>
+	      <if test="headimgurl != null" >
+	        	headimgurl = #{headimgurl,jdbcType=VARCHAR},
+	      </if>
+	       <if test="unionid != null" >
+	        	unionid = #{unionid,jdbcType=VARCHAR},
+	      </if>
+	       <if test="sex != null" >
+	        	sex = #{sex,jdbcType=VARCHAR},
+	      </if>
+    </set>
+    WHERE id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="getWechatUserDetails" parameterType="wechat" resultType="wechat">
+  	SELECT id,openid,nickname,sex,city,country,headimgurl,unionid,subscribe,language,province,subscribe_time,remark,createDate,groupid  FROM t_wechat  WHERE 1=1
+		<if test="openid != null">
+				AND openid = #{openid,jdbcType=VARCHAR} 
+		</if>
+		<if test="unionid != null">
+				AND unionid = #{unionid,jdbcType=VARCHAR} 
+		</if>
+  	 ORDER BY id DESC limit 1
+  </select>
+  
+  <select id="getWechatUserList"  resultType="wechat">
+  	SELECT id,openid,nickname,sex,city,country,headimgurl,unionid,subscribe,language,province,subscribe_time,remark,createDate,groupid FROM t_wechat  
+  </select>
+  
+   <insert id="savePushMessageLog" parameterType="pushMessageLog">
+  		INSERT INTO wechat_push_message_log
+  	<trim prefix="(" suffix=")" suffixOverrides="," >
+  	  <if test="user_id != null" >
+        	user_id,
+      </if>
+      <if test="type != null" >
+        	type,
+      </if>
+      <if test="message != null" >
+        	message,
+      </if>
+       <if test="mq_topic != null" >
+        	mq_topic,
+      </if>
+       <if test="push_time != null" >
+        	push_time,
+      </if>
+       <if test="openId != null" >
+        	openId,
+      </if>
+      <if test="unionId != null" >
+       		unionId,
+      </if>
+      <if test="real_name != null" >
+       		real_name,
+      </if>
+      <if test="state != null" >
+	        state,
+	  </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+    	<if test="user_id != null" >
+	        	#{user_id,jdbcType=VARCHAR},
+	      </if>
+	      <if test="type != null" >
+	        	#{type,jdbcType=VARCHAR},
+	      </if>
+	      <if test="message != null" >
+	      		#{message,jdbcType=VARCHAR},
+	      </if>
+	       <if test="mq_topic != null" >
+	        	#{mq_topic,jdbcType=VARCHAR},
+	      </if>
+	       <if test="push_time != null" >
+	        	#{push_time,jdbcType=VARCHAR},
+	      </if>
+	       <if test="openId != null" >
+	       		#{openId,jdbcType=VARCHAR},
+	      </if>
+	      <if test="unionId != null" >
+	        	#{unionId,jdbcType=VARCHAR},
+	      </if>
+	       <if test="real_name != null" >
+	        	#{real_name,jdbcType=VARCHAR},
+	      </if>
+	      <if test="state != null" >
+	        	#{state,jdbcType=VARCHAR},
+	      </if>
+    </trim>
+  </insert>
+</mapper>

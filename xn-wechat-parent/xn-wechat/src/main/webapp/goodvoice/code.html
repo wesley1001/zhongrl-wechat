@@ -1,0 +1,38 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>code</title>
+<script type="text/javascript" src="/xn-wechat/static/js/jquery.min.js"></script>
+</head>
+<body>
+	<div id="name" style="font-size: 26px;color: bule;"></div>
+</body>
+<script type="text/javascript">
+	function getQueryString(name) {
+	  var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+	  var r = window.location.search.substr(1).match(reg);
+	  if (r != null) return unescape(r[2]); return null;
+ 	}
+	
+	$(function(){
+		var code = getQueryString("code");
+		alert(code);
+		$.ajax({ 
+		    async: false, 
+		    url: "http://wxoauth.xiaoniuapp.com/xn-wechat/activity/user/myUserInfoHome.do", //这是我的服务端处理文件php的
+		    type: "POST", 
+		    data: {code:code}, //传递本页面获取的code到后台，以便后台获取openid
+		    success: function (ret) { 
+		    	var json = eval("("+ret+")"); 
+		    	if(json && json.code==0){
+		    		var data = eval("("+json.data+")");
+		    		$("#name").html(data.nickname);
+		    	}
+		    }, 
+		    error: function (jqXHR, textStatus, errorThrown) { 
+		      alert(textStatus); 
+		    } 
+		  });
+	});
+</script>
+</html>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xn.wechat.activity.mapper.ChangeRecordMapper">
+
+	<insert id="addChangeRecord" parameterType="cn.xn.wechat.activity.model.ChangeRecordVo">
+		insert into
+		t_activity_fans_changerecord
+		(id,prize_Id,user_id,change_date,status,address
+		,prizeName,material,remark,isVirtual,update_date,mobile,username) values (
+		#{recordId,jdbcType=VARCHAR},
+		#{prizeId,jdbcType=VARCHAR},
+		#{userId,jdbcType=VARCHAR},
+		#{changeDate,jdbcType=TIMESTAMP},
+		#{status,jdbcType=VARCHAR},
+		#{address,jdbcType=VARCHAR},
+		#{prizeName,jdbcType=VARCHAR},
+		#{material,jdbcType=INTEGER},
+		#{remark,jdbcType=VARCHAR},
+		#{isVirtual,jdbcType=INTEGER},
+		#{updateDate,jdbcType=TIMESTAMP},
+		#{mobile,jdbcType=VARCHAR},
+		#{username,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<update id="modifyChangeRecordByMap" parameterType="map">
+		update t_activity_fans_changerecord
+		<set>
+			<if test="status != null">
+				status = #{status,jdbcType=VARCHAR},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="mobile != null">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				address = #{address,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		<where>
+			<if test="recordId != null">
+				id=#{recordId,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</update>
+
+
+	<select id="findChangePrizeListByMap" parameterType="map"
+		resultType="cn.xn.wechat.activity.model.ChangeRecordVo">
+		select id as recordId,prize_Id as prizeId,user_id as userId,
+		change_date as changeDate,status,
+		address,prizeName,material,remark,isVirtual,
+		update_date as updateDate,mobile from t_activity_fans_changerecord
+		<where>
+			<if test="userId != null">
+				user_id = #{userId,jdbcType=VARCHAR}
+			</if>
+			<if test="status != null">
+				and status = #{status,jdbcType=VARCHAR}
+			</if>
+			<if test="recordId != null">
+				and id = #{recordId,jdbcType=VARCHAR}
+			</if>
+		</where>
+		 ORDER BY change_date desc
+	</select>
+
+
+	<select id="sumChangeMaterialByMap" parameterType="map"
+		resultType="Integer">
+		select sum(material) from t_activity_fans_changerecord
+		<where>
+			<if test="userId != null">
+				user_id =#{userId,jdbcType=VARCHAR}
+			</if>
+			<if test="status != null">
+				and status = #{status,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+	
+	<select id="getUserChangeRecordByUserId" parameterType="string"
+		resultType="int">
+		select count(1) from t_activity_fans_changerecord where `status`='SUCCESS' and user_id=#{userId,jdbcType=VARCHAR}
+	</select>
+	
+
+</mapper>

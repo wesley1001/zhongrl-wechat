@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xn.wechat.web.mapper.ActivityMapper" >
+  
+  <parameterMap type="clickNumber" id="clickNumber" />
+  <parameterMap type="wechatConfig" id="wechatConfig" />
+  
+  <select id="getClickNumber" resultType="clickNumber" parameterType="clickNumber">
+  		SELECT 
+  			actualClickNumber,showClickNumber,activityType 
+  		FROM wechat_click_number 
+  		 	WHERE activityType =  #{activityType, jdbcType=VARCHAR}
+  </select>
+  
+  <insert id="saveIMToken" parameterType="map">
+  		INSERT INTO t_im_token(token,createTime) VALUES (#{token, jdbcType=VARCHAR},#{createTime, jdbcType=VARCHAR})
+  </insert>
+  
+  <insert id="saveWechat" parameterType="java.util.List">
+		INSERT INTO t_wechat(subscribe,openid,nickname,sex,language,province,city,
+			country,headimgurl,subscribe_time,unionid,remark,groupid,createDate)
+			VALUES
+			 <foreach collection="list" item="item" index="index" separator="," >  
+		        (#{item.subscribe,jdbcType=VARCHAR},
+					#{item.openid,jdbcType=VARCHAR},
+					#{item.nickname,jdbcType=VARCHAR},
+					#{item.sex,jdbcType=VARCHAR},
+					#{item.language,jdbcType=VARCHAR},
+					#{item.province,jdbcType=VARCHAR},
+					#{item.city,jdbcType=VARCHAR},
+					#{item.country,jdbcType=VARCHAR},
+					#{item.headimgurl,jdbcType=VARCHAR},
+					#{item.subscribe_time,jdbcType=VARCHAR},
+					#{item.unionid,jdbcType=VARCHAR},
+					#{item.remark,jdbcType=VARCHAR},
+					#{item.groupid,jdbcType=VARCHAR},now())  
+		    </foreach>  
+	</insert>
+	
+	<select id="getWechatUser" resultType="wechat" parameterType="map">
+		select t.* from t_wechat t where unionid = #{unionid,jdbcType=VARCHAR} 
+	</select>
+  
+   <select id="getIMToken" resultType="string" >
+  		SELECT 
+  			token
+  		FROM t_im_token ORDER BY Id DESC LIMIT 1
+  </select>
+  
+  <update id="updateClickNumber" parameterMap="clickNumber">
+  		UPDATE wechat_click_number SET  
+	  		actualClickNumber = actualClickNumber + 1,
+	  		showClickNumber= showClickNumber + #{showClickNumber, jdbcType=VARCHAR} 
+  		WHERE activityType = #{activityType, jdbcType=VARCHAR}
+  </update>
+  
+  <update id="updateWechatConfig" parameterMap="wechatConfig">
+  		UPDATE wechat_config 
+			<set>
+				<if test="ticket!=null"> 
+					ticket = #{ticket, jdbcType=VARCHAR},
+				</if>
+				<if test="token!=null"> 
+					token=#{token, jdbcType=VARCHAR},
+				</if>
+				<if test="updateTime!=null"> 
+					updateTime = #{updateTime, jdbcType=VARCHAR},
+				</if>
+			</set>
+  		WHERE type = #{type, jdbcType=VARCHAR}
+  </update>
+  
+  <select id="getWechatConfig" resultType="wechatConfig" parameterType="wechatConfig">
+  		SELECT ticket,token,updateTime,token as access_token 
+  		FROM wechat_config 
+  		 	WHERE type =  #{type, jdbcType=VARCHAR}
+  </select>
+  
+  <insert id="saveQRImageAndTicket" parameterType="map">
+  		INSERT INTO wechat_qr_details(FqrImageUrl,ticket,createDate,channel) 
+  				VALUES(#{qrImage, jdbcType=VARCHAR},#{ticket, jdbcType=VARCHAR},#{createDate, jdbcType=VARCHAR},#{channel, jdbcType=VARCHAR})
+  </insert>
+  
+  <insert id="saveQrCodeEvent" parameterType="map">
+   		INSERT INTO wechat_qrcode_event(ToUserName,FromUserName,CreateTime,MsgType,Event,EventKey,Ticket)
+	   		VALUES(#{toUserName, jdbcType=VARCHAR},#{fromUserName, jdbcType=VARCHAR},#{createTime, jdbcType=VARCHAR}
+	   		,#{msgType, jdbcType=VARCHAR},#{event, jdbcType=VARCHAR},#{eventKey, jdbcType=VARCHAR},#{ticket, jdbcType=VARCHAR})
+  </insert>
+  
+</mapper>

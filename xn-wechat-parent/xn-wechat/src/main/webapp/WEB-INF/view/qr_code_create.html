@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>qr-code</title>
+<script type="text/javascript" src="/xn-wechat-activity/static/js/jquery.min.js"></script>
+</head>
+<body>
+	渠道：<input type="text" name="channel" id="channel" width="150" />
+	<input type="button" value="生成二维码" id="qr_button"/>
+	<br/>
+	<div id="html_image">
+		
+	</div>
+	
+</body>
+<script type="text/javascript">
+$(function(){
+	$("#qr_button").on("click",function(){
+		var channel = $("#channel").val();
+		if(channel == "" || channel == null){
+			alert("请填写渠道");
+			return false;
+		}
+		//初始化微信接口
+		$.ajax({
+			type : "post",
+			dataType : 'json',
+			url : '${path}/weChatQrCode/createQrCode',
+			data : {
+				"channel":channel
+			},
+			success : function(data){
+				$("#html_image").html("");
+				var html = "";
+				if(data.code == 0){
+					html = "<img src='"+data.data.qrImage+"' width='200' height='200'><br/>";
+					html = html + "<span style='font-size:18px;'>生成的"+channel+"二维码成功</span><br/>";
+					html = html + '<a href="'+data.data.qrImage+'" id=pic1 onclick="savepic();return false;" style="cursor:hand">点击下载二维码,只支持IE内核浏览器，其他浏览器可点击鼠标右键选择图片另存为选项</a>'
+					$("#html_image").html(html);
+				}else{
+					html = html + "<span style='font-size:18px;'>生成的"+channel+"二维码失败</span>";
+					$("#html_image").html(html);
+				}
+			}
+		});
+	});
+});
+
+function savepic() { 
+	if (document.all.a1 == null) { 
+		objIframe = document.createElement("IFRAME"); 
+		document.body.insertBefore(objIframe); 
+		objIframe.outerHTML = "<iframe name=a1 style='width:0px;hieght:0px;display:none;' src=" + imageName.href + "></iframe>"; 
+		re = setTimeout("savepic()", 1) 
+	} else { 
+		clearTimeout(re) 
+		pic = window.open(imageName.href, "a1") 
+		pic.document.execCommand("SaveAs") 
+		document.all.a1.removeNode(true) 
+	} 
+} 
+
+</script>
+</html>

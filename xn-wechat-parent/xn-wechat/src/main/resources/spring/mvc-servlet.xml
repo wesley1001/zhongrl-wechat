@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+	    http://www.springframework.org/schema/context
+	    http://www.springframework.org/schema/context/spring-context-3.2.xsd
+	    http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+	    http://www.springframework.org/schema/tx
+	    http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+	    http://www.springframework.org/schema/aop
+	    http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+	    http://www.springframework.org/schema/util 
+	    http://www.springframework.org/schema/util/spring-util-3.2.xsd">
+
+ 	<mvc:annotation-driven />
+
+    <!-- 设置使用注解的类所在的jar包 -->
+    <context:component-scan base-package="cn.xn.wechat"></context:component-scan>
+ 	
+     <!-- 完成请求和注解POJO的映射 -->
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
+    
+	 <!-- 配置视图解析器，将ModelAndView及字符串解析为具体的页面 
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
+		 <property name="prefix" value="/WEB-INF/view/" />  
+		 <property name="suffix" value=".jsp" />  
+	</bean>  -->
+
+    <!-- 配置JSON视图 -->
+     <bean id="mappingJacksonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+       <property name="supportedMediaTypes">
+           <list>
+               <value>application/json;charset=UTF-8</value>
+           </list>
+       </property>     
+       <property name="objectMapper">
+           <bean class="org.codehaus.jackson.map.ObjectMapper">
+               <property name="dateFormat">
+                   <bean class="java.text.SimpleDateFormat">
+                       <constructor-arg index="0" type="java.lang.String" value="yyyy-MM-dd HH:mm:ss"/>
+                   </bean>
+               </property>
+           </bean>
+       </property>
+     </bean>
+     <bean id="stringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter"/>
+     <bean id="requestMappingHandlerAdapter" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+       <property name="messageConverters">
+           <list>
+              <ref bean="mappingJacksonHttpMessageConverter"/>
+              <ref bean="stringHttpMessageConverter"/>
+           </list>
+       </property>
+     </bean>
+     
+     <!-- 配置JSP视图 -->
+     <bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+       <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/WEB-INF/view/"/>
+        <property name="suffix" value=".jsp"/>      
+        <property name="contentType" value="text/html;charset=UTF-8"/>
+        <property name="order" value="1"/>
+     </bean>
+
+
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <bean id="jsonHttpMessageConverter"
+                            class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter"/>
+            </list>
+        </property>
+	
+    </bean>
+
+
+    <!-- 当在web.xml 中   DispatcherServlet使用 <url-pattern>/</url-pattern> 映射时，能映射静态资源 -->
+    <mvc:default-servlet-handler/>
+
+    <!-- 管理后台静态资源映射 -->
+    <mvc:resources location="/static/js/" mapping="/js/**" />
+    <mvc:resources location="/static/css/" mapping="/css/**" />
+    <mvc:resources location="/static/images/" mapping="/images/**" />
+    <mvc:resources location="/static/ui/" mapping="/ui/**" />
+
+  
+   	
+	<!-- <bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+		p:viewClass="org.springframework.web.servlet.view.JstlView" p:prefix="/WEB-INF/view/"
+		p:suffix=".jsp" /> -->
+
+	<!-- 文件上传 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="1100000000" />
+		
+	</bean>
+
+</beans>

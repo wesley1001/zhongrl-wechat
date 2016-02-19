@@ -1,0 +1,58 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>qr-code</title>
+<script type="text/javascript" src="/xn-wechat-activity/static/js/jquery.min.js"></script>
+</head>
+<body>
+	<table>
+		<tr >
+			<td nowrap="nowrap">微信菜单json：</td>
+			<td nowrap="nowrap">
+				<textarea rows="15" cols="22" style="width: 600px;height: 400px;" name="jsonMenu" id="jsonMenu"></textarea>
+			</td>
+		</tr>
+		<tr style="padding-top: 35px;">
+			<td colspan="2" align="center">
+				<input type="button" value="菜单生效" id="qr_button" />
+			</td>
+		</tr>
+		<tr style="padding-top: 35px;">
+			<td colspan="2" align="center">
+				<div id="html_image" style="color: red;"></div>
+			</td>
+		</tr>		
+	</table>
+</body>
+<script type="text/javascript">
+$(function(){
+	$("#qr_button").on("click",function(){
+		var jsonMenu = $("#jsonMenu").val();
+		if(jsonMenu == "" || jsonMenu == null){
+			alert("请填菜单");
+			return false;
+		}
+		//初始化微信接口
+		$.ajax({
+			type : "post",
+			dataType : 'json',
+			url : 'http://wxoauth.xiaoniuapp.com/xn-wechat-activity/weChatMenu/createWeChatMenu',
+			data : {
+				"jsonMenu":jsonMenu
+			},
+			success : function(data){
+				$("#html_image").html("");
+				var html = "";
+				if(data.code == 0){
+					html = html + "<span style='font-size:20px;'>"+data.msg+"</span>";
+					$("#html_image").html(html);
+				}else{
+					html = html + "<span style='font-size:20px;'>"+data.msg+"/span>";
+					$("#html_image").html(html);
+				}
+			}
+		});
+	});
+});
+</script>
+</html>

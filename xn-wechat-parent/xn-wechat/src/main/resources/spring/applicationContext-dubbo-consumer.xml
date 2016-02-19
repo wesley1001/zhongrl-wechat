@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+              http://www.springframework.org/schema/beans/spring-beans.xsd
+              http://code.alibabatech.com/schema/dubbo
+              http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+	  
+	<dubbo:application name="xn-wechat" organization="xn-wechat"
+		owner="yiqiang" logger="log4j" />
+
+	<dubbo:registry id="xnwechatClientRegistry" client="${dubbo.registry.client}"
+		protocol="${dubbo.registry.protocol}" address="${dubbo.registry.address}"
+		  />
+
+	<dubbo:consumer id="xnwechatConsumber" registry="xnwechatClientRegistry"
+		check="${dubbo.consumer.check}" timeout="${dubbo.consumer.timeout}"
+		version="1.0"  retries="0" />
+
+	<dubbo:reference id="iSmsService"
+		interface="com.xiaoniu.sms.service.ISmsService" consumer="xnwechatConsumber" group="p2p"/>
+		
+	<dubbo:reference id="iCustomerInfoService"  interface="cn.xn.user.service.ICustomerInfoService"
+                     consumer="xnwechatConsumber" group="p2p"/>
+                     
+    <dubbo:reference interface="cn.xn.cache.service.ICommonRedisService" id="commonRedisService" 
+    	check="false" timeout="20000" version="1.0" />
+</beans>

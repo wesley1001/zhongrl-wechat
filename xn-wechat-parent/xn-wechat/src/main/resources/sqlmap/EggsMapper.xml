@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xn.wechat.activity.mapper.EggsMapper">
+
+	<parameterMap type="rateToken" id="rateToken" />
+ 	<parameterMap type="lmOrder" id="lmOrder" />
+ 	<parameterMap type="lmHttpLog" id="lmHttpLog" />
+ 	<parameterMap type="eggsQRcode" id="eggsQRcode" />
+ 	<insert id="saveApiLog" parameterType="lmHttpLog">
+ 	
+ 		INSERT INTO t_lm_api_log(mobile,orderNumber,param,result,url,createDate)VALUES(#{mobile},#{orderNumber},#{param},#{result},#{url},#{createDate})
+ 	</insert>
+	<sql id="base_Column_List">
+		id,user_id,openid,material,create_date,activicty_code,user_type,eggs_user_id
+	</sql>
+	
+	<update id="updateNumber" parameterType="map">
+		UPDATE t_lm_number SET number = number - #{number,jdbcType=INTEGER} ,updateDate = #{updateDate} WHERE type = #{type}
+	</update>
+	
+	<update id="updateTotleNumber" parameterType="map">
+		UPDATE t_lm_number SET number = number + #{number,jdbcType=INTEGER} ,totle = totle + #{totle,jdbcType=INTEGER} updateDate = #{updateDate} WHERE type = #{type}
+	</update>
+	
+	<select id="getNumber" resultType="int" parameterType="map">
+		select number from t_lm_number where type = #{type}
+	</select>
+
+	<insert id="addEggsRecord" parameterType="cn.xn.wechat.activity.model.ScanQRCodeRecord">
+		INSERT INTO
+		t_activity_fans_scanrecord
+		(id,openid,material,
+		create_date,activicty_code,eggs_user_id,user_type)
+		VALUES
+		(#{id},#{openid},#{material},#{create_date},#{activicty_code},#{eggs_user_id},#{user_type})
+	</insert>
+
+	<insert id="insertShareLog" parameterType="cn.xn.wechat.activity.model.ShareLog">
+		insert into
+		t_wechat_share_log
+		(userId,ipAddress,createDate,
+		content,activityType)
+		values
+		(#{userId},#{ipAddress},now(),#{content},#{activityType})
+	</insert>
+	<select id="queryEggsScanQRCodes" resultType="cn.xn.wechat.activity.resp.EggsResp"
+		parameterType="map">
+		SELECT tf.id,tf.openid,tf.create_date, tf.nickname,tf.headimgurl,tf.material,ta.user_type,tf.referee_id ,ta.openid
+			FROM t_activity_fans_scanrecord ta left join t_activity_eggs_userinfo tf ON (ta.eggs_user_id= tf.referee_id AND ta.openid = tf.openid) 
+			WHERE tf.referee_id = #{userId} and ta.activicty_code = '11' and ta.user_type='NEW' group by ta.id   
+			ORDER by ta.create_date desc  limit  #{pageIndex,jdbcType=INTEGER},#{pageSize,jdbcType=INTEGER} 
+	</select>
+	
+	
+	<select id="countqueryEggsScanQRCodes" resultType="int"
+		parameterType="int">
+		select COUNT(1) from (SELECT COUNT(1) FROM t_activity_fans_scanrecord ta left join t_activity_eggs_userinfo tf ON (ta.eggs_user_id= tf.referee_id AND ta.openid = tf.openid) 
+			WHERE tf.referee_id = #{userId} and ta.activicty_code = '11' and ta.user_type='NEW' group by ta.id   
+			ORDER by ta.create_date desc) number 
+	</select>
+
+	<select id="getRecordOfConversion" parameterType="map" resultType="lmOrder">
+		SELECT te.id,te.orderNmuber,te.mobile,
+			te.carrieroperator,te.orderNoLM,te.satats,
+			te.goldenEggsNumber,te.createDate,te.eggsId,
+			te.updateDate,te.prizeId,te.flowValue,ta.prize_name as prizeName 
+		 FROM t_activity_eggs_changercord te left join t_activity_fans_prizeinfo ta on te.prizeId = ta.id  
+		  WHERE 1 = 1 
+		  <if test="userId != null and userId > 0">
+		  		AND te.eggsId = #{userId,jdbcType=INTEGER}
+		  </if>
+		  <if test="mobile != null and mobile != ''">
+		  		AND te.mobile = #{mobile,jdbcType=VARCHAR}
+		  </if>
+		   order by te.id desc
+	</select>
+
+	<select id="findEggsQRCodeRecordByMap" resultType="cn.xn.wechat.activity.model.ScanQRCodeRecord"
+		parameterType="map">
+		select
+		<include refid="base_Column_List" />
+		from t_activity_fans_scanrecord
+		<where>
+			1=1
+			<if test="activicty_code != null">
+				AND activicty_code = #{activicty_code}
+			</if>
+			<if test="openid != null">
+				AND openid = #{openid}
+			</if>
+			<if test="userId != null">
+				AND eggs_user_id = #{userId}
+			</if>
+		</where>
+		limit 1 
+	</select>
+
+	<sql id="base_Column_List_eggs">
+		id,nickname, unionid, openid, headimgurl,
+		referee_id,
+		channel, material, create_date as createDate,
+		source, update_date as
+		updateDate, status
+	</sql>
+
+	<insert id="addEggsUserInfo" parameterType="cn.xn.wechat.activity.model.FansUserInfo" useGeneratedKeys="true" keyProperty="id">
+		insert into t_activity_eggs_userinfo
+		(nickname,unionid,openid,headimgurl,referee_id,channel,
+		material,create_date,source,status) values (
+		#{nickname},#{unionid},#{openid},#{headimgurl},#{referee_id},#{channel},#{material},#{createDate},#{source},1)
+		<selectKey keyProperty="id" resultType="int" order="AFTER">
+			select LAST_INSERT_ID() 
+		</selectKey> 
+	</insert>
+
+	<select id="getEggsUserInfoByMap" resultType="cn.xn.wechat.activity.model.FansUserInfo"
+		parameterType="map">
+		select
+		<include refid="base_Column_List_eggs" />
+		from t_activity_eggs_userinfo
+		<where>
+			status=1
+			<if test="openid != null">
+				AND openid = #{openid}
+			</if>
+			<if test="unionid != null">
+				AND unionid = #{unionid}
+			</if>
+			<if test="id != null and id>0 ">
+				AND id = #{id}
+			</if>
+		</where>
+	</select>
+
+	<select id="getEggsUserInfoById" resultType="cn.xn.wechat.activity.model.FansUserInfo"
+		parameterType="int">
+		SELECT 
+		ta.*, tf.qrCodeUrl
+		FROM t_activity_eggs_userinfo ta LEFT JOIN t_activity_fans_qrcode tf ON (ta.id=tf.userId AND tf.activityType='11' ) where ta.id = #{id,jdbcType=INTEGER} 
+	</select>
+	
+	<update id="updateEggsUserInfo" parameterType="cn.xn.wechat.activity.model.FansUserInfo">
+		update t_activity_eggs_userinfo
+		<set>
+			<if test="material != null">
+				material = #{material,jdbcType=INTEGER},
+			</if>
+			<if test="openid != null">
+				openid = #{openid},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getBuddyList" parameterType="int" resultType="cn.xn.wechat.activity.model.ScanQRCodeRecord">
+			select
+				<include refid="base_Column_List" /> 
+				 from t_activity_fans_scanrecord where eggs_user_id = #{userId,jdbcType=INTEGER}
+	</select>
+
+	<insert id="saveRateToken" parameterType="map">
+		INSERT INTO t_eggs_ratetoken(token,createDate,type)VALUES(#{token,jdbcType=VARCHAR},#{createDate,jdbcType=VARCHAR},#{type,jdbcType=VARCHAR});
+	</insert>
+	
+	<update id="updateRateToken" parameterType="map">
+		UPDATE t_eggs_ratetoken SET token = #{token,jdbcType=VARCHAR},updateTime =#{updateTime,jdbcType=VARCHAR}  WHERE type = #{type,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="getRateToken" parameterType="string" resultType="rateToken">
+		select Id,token,createDate,updateTime,type from t_eggs_ratetoken where type = #{type,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 生蛋活动奖品订单 -->
+	<insert id="saveEggsOrder" parameterType="lmOrder">
+		INSERT INTO t_activity_eggs_changercord
+	  	<trim prefix="(" suffix=")" suffixOverrides="," >
+	      <if test="orderNmuber != null" >
+	        	orderNmuber,
+	      </if>
+	      <if test="mobile != null" >
+	        	mobile,
+	      </if>
+	      <if test="carrieroperator != null" >
+	        	carrieroperator,
+	      </if>
+	       <if test="orderNoLM != null" >
+	        	orderNoLM,
+	      </if>
+	       <if test="satats != null" >
+	        	satats,
+	      </if>
+	       <if test="goldenEggsNumber != null" >
+	        	goldenEggsNumber,
+	      </if>
+	      <if test="createDate != null" >
+	       		createDate,
+	      </if>
+	      <if test="eggsId != null" >
+	        	eggsId,
+	      </if>
+	      <if test="updateDate != null" >
+		       	 updateDate,
+		  </if>
+		   <if test="prizeId != null" >
+		       	 prizeId,
+		  </if>
+		   <if test="flowValue != null" >
+		       	 flowValue,
+		  </if>
+	    </trim>
+	    <trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+	    	<if test="orderNmuber != null" >
+	        	#{orderNmuber,jdbcType=VARCHAR},
+	      </if>
+	      <if test="mobile != null" >
+	        	#{mobile,jdbcType=VARCHAR},
+	      </if>
+	      <if test="carrieroperator != null" >
+	        	#{carrieroperator,jdbcType=VARCHAR},
+	      </if>
+	       <if test="orderNoLM != null" >
+	        	#{orderNoLM,jdbcType=VARCHAR},
+	      </if>
+	       <if test="satats != null" >
+	        	#{satats,jdbcType=VARCHAR},
+	      </if>
+	       <if test="goldenEggsNumber != null" >
+	        	#{goldenEggsNumber,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createDate != null" >
+	       		#{createDate,jdbcType=VARCHAR},
+	      </if>
+	      <if test="eggsId != null" >
+	        	#{eggsId,jdbcType=INTEGER},
+	      </if>
+	      <if test="updateDate != null" >
+		       #{updateDate,jdbcType=VARCHAR},
+		  </if>
+		   <if test="prizeId != null" >
+		       	 #{prizeId,jdbcType=INTEGER},
+		  </if>
+		   <if test="flowValue != null" >
+		       	 #{flowValue,jdbcType=VARCHAR},
+		  </if>
+	    </trim>
+	</insert>
+	
+	<update id="updateEggsOrder" parameterMap="lmOrder">
+		UPDATE t_activity_eggs_changercord SET 
+			satats = #{orderNoLM,jdbcType=VARCHAR},
+			orderNoLM = #{orderNoLM,jdbcType=VARCHAR},
+			updateDate = #{updateDate,jdbcType=VARCHAR},
+		
+	</update>
+	
+	<insert id="addEggsQrCode" parameterType="map">
+		INSERT INTO t_activity_fans_qrcode(userId,qrCodeUrl,startDate,endDate,activityType)
+		VALUES(#{userId,jdbcType=VARCHAR},#{qrCodeUrl,jdbcType=VARCHAR},#{startDate,jdbcType=VARCHAR}
+		,#{endDate,jdbcType=VARCHAR},#{activityType,jdbcType=VARCHAR})
+	</insert>
+	
+	<select id="getEggsQrCode" parameterType="map" resultType="eggsQRcode">
+		SELECT id,userId,qrCodeUrl,activityType 
+		FROM t_activity_fans_qrcode WHERE userId = #{userId,jdbcType=VARCHAR} order by id DESC limit 1
+	</select>
+	
+	<update id="updateEggsQrCode" parameterType="map">
+		UPDATE t_activity_fans_qrcode SET  
+			qrCodeUrl = #{qrCodeUrl,jdbcType=VARCHAR},startDate = #{startDate,jdbcType=VARCHAR},
+			endDate = #{endDate,jdbcType=VARCHAR},activityType =#{activityType,jdbcType=VARCHAR} 
+		WHERE userId =#{userId,jdbcType=VARCHAR}
+	</update>
+</mapper>

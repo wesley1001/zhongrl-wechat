@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:amq="http://activemq.apache.org/schema/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+        ">
+
+	<!-- 重发策略设置 -->
+	<amq:redeliveryPolicyMap id="redeliveryPolicyMap">
+		<amq:redeliveryPolicyEntries>
+			<amq:redeliveryPolicy topic=">" maximumRedeliveries="3" />
+			<amq:redeliveryPolicy queue=">" maximumRedeliveries="3" />
+		</amq:redeliveryPolicyEntries>
+	</amq:redeliveryPolicyMap>
+
+	<bean id="jmsFactory" class="org.apache.activemq.pool.PooledConnectionFactory"
+		destroy-method="stop">
+		<property name="connectionFactory">
+			<bean class="org.apache.activemq.ActiveMQConnectionFactory">
+				<property name="brokerURL">
+					<value>${jms.activemq.server}</value>
+				</property>
+				<property name="RedeliveryPolicyMap" ref="redeliveryPolicyMap" />
+			</bean>
+		</property>
+		<property name="maxConnections" value="100"></property>
+	</bean>
+
+	<!-- spring jms 模版 -->
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate" >
+		<property name="connectionFactory" ref="jmsFactory" />
+		<!--订阅 发布模式 -->
+		<property name="pubSubDomain" value="true" />
+	</bean>
+	
+	<!-- 提现审核， 提现成功监听消息 -->
+	<bean id="UserOutTopic" class="org.apache.activemq.command.ActiveMQTopic">
+		<constructor-arg value="UserOutTopic" />
+	</bean>
+	
+	<!-- 回款提醒监听消息 -->
+	<bean id="MICRO_CHANNEL_PUSH_REMINDER" class="org.apache.activemq.command.ActiveMQTopic">
+		<constructor-arg value="MICRO_CHANNEL_PUSH_REMINDER" />
+	</bean>
+	
+	<!-- 红包提现监听消息 -->
+	<bean id="ACTIVITY_ACCOUNT_AMOUNT_CHANGE" class="org.apache.activemq.command.ActiveMQTopic">
+		<constructor-arg value="ACTIVITY_ACCOUNT_AMOUNT_CHANGE" />
+	</bean>
+	
+	<!-- 提现审核， 提现成功  -->
+	<bean id="accountremindAndWithdrawalsOutMessageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="connectionFactory" ref="jmsFactory" />
+		<property name="destination" ref="UserOutTopic" />
+		<property name="messageListener" ref="accountremindAndWithdrawalsOutMessageListener" />
+		<property name="clientId" value="${jms.connection.clientId}_accountremindAndWithdrawalsOutMessageListener" />
+		<property name="sessionTransacted" value="true" />
+		<property name="subscriptionDurable" value="true" />
+		<property name="durableSubscriptionName" value="WECHAT_ACCOUNTREMINDANDWITHDRAWALS" />
+	</bean>
+	
+	<!-- 回款提醒 -->
+	<bean id="paymentOutMessageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="connectionFactory" ref="jmsFactory" />
+		<property name="destination" ref="MICRO_CHANNEL_PUSH_REMINDER" />
+		<property name="messageListener" ref="paymentOutMessageListener" />
+		<property name="clientId" value="${jms.connection.clientId}_paymentOutMessageListener" />
+		<property name="sessionTransacted" value="true" />
+		<property name="subscriptionDurable" value="true" />
+		<property name="durableSubscriptionName" value="WECHAT_PAYMENTOUTMESSAGE" />
+	</bean>
+	
+	<!-- 红包返现 -->
+	<bean id="exchangeRedPaperOutMessageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="connectionFactory" ref="jmsFactory" />
+		<property name="destination" ref="ACTIVITY_ACCOUNT_AMOUNT_CHANGE" />
+		<property name="messageListener" ref="exchangeRedPaperOutMessageListener" />
+		<property name="clientId" value="${jms.connection.clientId}_exchangeRedPaperOutMessageListener" />
+		<property name="sessionTransacted" value="true" />
+		<property name="subscriptionDurable" value="true" />
+		<property name="durableSubscriptionName" value="WECHAT_EXCHANGEREDPAPEROUTMESSAGE" />
+	</bean>
+</beans> 
+

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <!--mvn org.mybatis.generator:mybatis-generator-maven-plugin:ewt-1.0.0-SANPSHOT:generate-->
+    <!--<properties   url="src/main/resources/mybatis.properties" />-->
+    <classPathEntry location="E:/repository/mysql/mysql-connector-java/5.1.27" />
+    <context id="MBG" targetRuntime="MyBatis3">    <!--targetRuntime 此属性用于指定生成的代码的运行目标。 -->
+        <!--<plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin" />-->
+        <plugin type="com.moker.core.support.mybatis.CommentPlugin" />
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin"/>
+        <plugin type="org.mybatis.generator.plugins.RowBoundsPlugin"/>
+
+        <plugin type="org.mybatis.generator.plugins.RenameExampleClassPlugin">
+            <property name="searchString" value="Example$"/>
+            <property name="replaceString" value="Criteria"/>
+        </plugin>
+        <commentGenerator>
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+
+        <!--postgreSQL-->
+        <!--<jdbcConnection driverClass="org.postgresql.Driver" connectionURL="jdbc:postgresql://172.17.1.48:5432/ewt_test" userId="postgres" password="ewt123456"/>-->
+        <!--MySQL-->
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://127.0.0.1:3306/hytz365"
+                        userId="root" password="spring" />
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+            <!-- 类型解析器 -->
+        </javaTypeResolver>
+
+        <javaModelGenerator targetPackage="cn.xn.product.web.model"
+                            targetProject="src/main/java">
+            <!-- 实体类 -->
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <!-- 实体类SQL映射文件 -->
+        <sqlMapGenerator targetPackage="sqlmap"
+                         targetProject="src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <javaClientGenerator type="XMLMAPPER" targetPackage="cn.xn.product.web.mapper"
+                             targetProject="src/main/java">
+            <property name="rootInterface" value="cn.xn.freamwork.support.orm.mapper.BaseMapper" />
+            <property name="enableSubPackages" value="true"/>
+            <!-- 接口 -->
+        </javaClientGenerator>
+
+       
+
+        <table schema="" tableName="user_info" domainObjectName="UserInfo">
+            <generatedKey column="id" sqlStatement="JDBC"/>
+        </table>
+
+
+    </context>
+</generatorConfiguration>

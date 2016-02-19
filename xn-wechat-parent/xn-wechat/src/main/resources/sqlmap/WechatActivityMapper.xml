@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xn.wechat.activity.mapper.WechatActivityMapper">
+
+	<select id="getActivityByMap" resultType="cn.xn.wechat.activity.model.WechatActivity"
+		parameterType="map">
+		SELECT id,
+		activity_name as activityName,
+		start_date as startDate,
+		end_date as endDate,
+		productIds,
+		create_date as createDate,
+		update_date
+		as updateDate ,
+		status,activity_type as activityType,
+		activity_rule_desc as activityRule
+		FROM t_activity
+		<where>
+			status='new'
+			<if test="activityType!=null and activityType!=''">
+				and activity_type=#{activityType,jdbcType=VARCHAR}
+			</if>
+			<if test="currentDate != null">
+		   <![CDATA[
+	   			 and unix_timestamp(start_date) <= unix_timestamp(#{currentDate,jdbcType=VARCHAR})  and 
+	   			 unix_timestamp(end_date) > unix_timestamp(#{currentDate,jdbcType=VARCHAR}) 
+		   ]]>
+			</if>
+		</where>
+	</select>
+
+	<select id="getActivityByType" resultType="cn.xn.wechat.activity.model.WechatActivity"
+		parameterType="string">
+		SELECT id,
+		activity_name as activityName,
+		start_date as startDate,
+		end_date as endDate,
+		productIds,
+		create_date as createDate,
+		update_date
+		as updateDate ,
+		status,activity_type as activityType,
+		activity_rule_desc as activityRule
+		FROM t_activity
+		<where>
+			status='new'
+			<if test="activityType!=null and activityType!=''">
+				and activity_type=#{activityType}
+			</if>
+		</where>
+	</select>
+
+
+</mapper>

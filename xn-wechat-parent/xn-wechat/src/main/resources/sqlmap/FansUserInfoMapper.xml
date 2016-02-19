@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xn.wechat.activity.mapper.FansUserInfoMapper">
+
+	<sql id="base_Column_List">
+		id,userId, nickname, unionid, openid, headimgurl,
+		referee_id,
+		channel, material, create_date as createDate,
+		source, update_date as
+		updateDate, status
+	</sql>
+
+	<insert id="addFansUserInfo"  parameterType="cn.xn.wechat.activity.model.FansUserInfo" >
+		insert into t_activity_fans_userinfo (userId,nickname,unionid,openid,headimgurl,referee_id,channel,
+		material,create_date,source,status) values (#{userId},
+		#{nickname},#{unionid},#{openid},#{headimgurl},#{referee_id},#{channel},#{material},#{createDate},#{source},1)
+	</insert>
+
+	<select id="getFansUserInfoByMap" resultType="cn.xn.wechat.activity.model.FansUserInfo"
+		parameterType="map">
+		select
+		<include refid="base_Column_List"></include>
+		from t_activity_fans_userinfo
+		<where>
+			status=1 
+			<if test="userId != null">
+				AND userId = #{userId}
+			</if>
+			<if test="openid != null">
+				AND openid = #{openid}
+			</if>
+			<if test="unionid != null">
+				AND unionid = #{unionid}
+			</if>
+			<if test="id != null and id>0 ">
+				AND id = #{id}
+			</if>
+		</where>
+	</select>
+	
+	<select id="getFansUserInfoByUserId" resultType="cn.xn.wechat.activity.model.FansUserInfo"
+		parameterType="string">
+		select a.id,
+		 a.userId, nickname, a.unionid, a.openid, headimgurl,
+		referee_id,
+		  a.create_date as createDate,material,
+		update_date as
+		updateDate, status,b.url as qrCodeUrl
+		from t_activity_fans_userinfo a LEFT JOIN t_activity_fans_qrcode b on a.userId=b.userId where a.userId = #{userId}
+	</select>
+
+	<select id="getFansUserInfoById" resultType="cn.xn.wechat.activity.model.FansUserInfo"
+		parameterType="int">
+		select <include refid="base_Column_List"></include>
+		from t_activity_fans_userinfo where id = #{id}
+	</select>
+
+
+
+	<update id="updateFansUserInfo" parameterType="cn.xn.wechat.activity.model.FansUserInfo">
+		update t_activity_fans_userinfo
+		<set>
+			<if test="material != null">
+				material = #{material,jdbcType=INTEGER},
+			</if>
+			<if test="openid != null">
+				openid = #{openid},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		<where>
+				userId =  #{userId}
+		</where>
+	</update>
+	
+	
+	
+	<select id="queryInviteRecordByMap" resultType="cn.xn.wechat.activity.resp.InvitRecordResp"
+		parameterType="map">
+		  select  nickname,headimgurl,1 as material,create_date as createDate
+		  from t_activity_fans_userinfo    where referee_id=#{userId}  order by create_date desc
+		   limit  ${(pageIndex-1)*pageSize},#{pageSize} 
+	</select>
+	 
+	  
+	 <select id="countInviteRecordByUserId" resultType="int"
+		parameterType="string">
+		select count(1) from  t_activity_fans_userinfo where referee_id=#{userId}
+	</select>
+	 
+	 <select id="findRankTopNum" resultType="cn.xn.wechat.activity.resp.UserRankResp" parameterType="string">
+	SELECT c.userId,mycount as friends,
+	d.create_date as createDate,d.nickname,d.headimgurl from (
+	SELECT
+		a.userId,count(b.user_id) mycount
+	FROM
+		t_activity_fans_userinfo a
+	LEFT JOIN t_activity_fans_scanrecord b ON a.userId = b.user_id group by a.userId ) c  
+	INNER JOIN t_activity_fans_userinfo d on c.userId=d.userId ORDER BY mycount desc,create_date asc limit #{topNum}
+	 </select>
+	  
+	  
+	  <select id="countUser" resultType="int">
+	 		 select count(1) from t_activity_fans_userinfo
+	  </select>
+	  
+	  <update id="setRowNo">
+	  	 SET @rowNo = 1
+	  </update>
+	  
+	  <select id="getMyRankById"   resultType="cn.xn.wechat.activity.resp.MyRankResp" parameterType="string" >
+			 select * from (
+			SELECT c.userId,(@rowNo := @rowNo+1) as rowNo,
+			mycount as friends
+			 from (
+			SELECT
+				a.userId,count(b.user_id) mycount
+			FROM
+				t_activity_fans_userinfo a
+			LEFT JOIN t_activity_fans_scanrecord b ON a.userId = b.user_id group by a.userId ) c  
+			INNER JOIN t_activity_fans_userinfo d on c.userId=d.userId ORDER BY mycount desc,create_date asc )    
+			d where userId=#{userId}
+	  </select>
+	 
+</mapper>

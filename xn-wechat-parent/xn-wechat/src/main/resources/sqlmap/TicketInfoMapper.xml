@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xn.wechat.activity.mapper.TicketInfoMapper">
+	<insert id="addBatchTicket" parameterType="java.util.List">
+		INSERT INTO t_activity_fans_ticket_mzw (
+		F_INVESTID,
+		F_TICKET,
+		F_MOBILE,
+		F_STATUS,
+		F_INIT_DATE,
+		F_UPDATE_DATE,
+		F_REMARK
+		) VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.investId, jdbcType=VARCHAR}, #{item.ticket,
+			jdbcType=VARCHAR},
+			#{item.mobile, jdbcType=VARCHAR},#{item.status,
+			jdbcType=VARCHAR},#{item.initDate,jdbcType=TIMESTAMP},
+			#{item.updateDate,jdbcType=TIMESTAMP},#{item.remark, jdbcType=VARCHAR})
+		</foreach>
+	</insert>
+
+	<select id="getNotDistributeToTicketInfo" resultType="cn.xn.wechat.activity.model.TicketInfo">
+		select F_ID
+		as id,
+		F_INVESTID as investId,
+		F_TICKET as ticket,
+		F_MOBILE as mobile,
+		F_STATUS as status,
+		F_INIT_DATE as initDate,
+		F_UPDATE_DATE as updateDate,F_REMARK as remark
+		from t_activity_fans_ticket_mzw WHERE F_STATUS='UNSEND' ORDER BY
+		F_INIT_DATE DESC limit 1
+	</select>
+
+	<update id="updateBatchTicket" parameterType="cn.xn.wechat.activity.model.TicketInfo">
+		update t_activity_fans_ticket_mzw
+		<set>
+			<if test="investId != null">
+				F_INVESTID = #{investId},
+			</if>
+			<if test="mobile != null">
+				F_MOBILE = #{mobile},
+			</if>
+			<if test="status != null">
+				F_STATUS = #{status},
+			</if>
+			<if test="updateDate != null">
+				F_UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				F_REMARK = #{remark},
+			</if>
+			<if test="username != null">
+				F_USERNAME = #{username},
+			</if>
+		</set>
+		<where>
+			F_ID = #{id}
+		</where>
+	</update>
+
+	<select id="count" resultType="int">
+		select ifnull(count(1),0) as mycount from t_activity_fans_ticket_mzw
+	</select>
+	<select id="countAlert" resultType="int">
+		select ifnull(count(1),0) as mycount from t_activity_fans_ticket_mzw where F_STATUS='SEND'
+	</select>
+</mapper>

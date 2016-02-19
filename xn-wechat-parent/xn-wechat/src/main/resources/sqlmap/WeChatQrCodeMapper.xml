@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xn.wechat.web.mapper.WeChatQrCodeMapper" >
+
+
+ <insert id="saveQRImageAndTicket" parameterType="map">
+  		INSERT INTO wechat_qr_details(FqrImageUrl,ticket,createDate,channel) 
+  				VALUES(#{qrImage, jdbcType=VARCHAR},#{ticket, jdbcType=VARCHAR},#{createDate, jdbcType=VARCHAR},#{channel, jdbcType=VARCHAR})
+  </insert>
+  
+  <insert id="saveQrCodeEvent" parameterType="map">
+   		INSERT INTO wechat_qrcode_event(ToUserName,FromUserName,CreateTime,MsgType,Event,EventKey,Ticket)
+	   		VALUES(#{toUserName, jdbcType=VARCHAR},#{fromUserName, jdbcType=VARCHAR},#{createTime, jdbcType=VARCHAR}
+	   		,#{msgType, jdbcType=VARCHAR},#{event, jdbcType=VARCHAR},#{eventKey, jdbcType=VARCHAR},#{ticket, jdbcType=VARCHAR})
+  </insert>
+  
+  <select id="getWechatPayAttentionInformation" parameterType="string" resultType="weChatQrCode">
+  		SELECT Id AS id,
+  			ToUserName AS toUserName,
+  			FromUserName AS fromUserName,
+  			CreateTime AS createTime,
+  			MsgType AS msgType,
+  			Event AS event,
+  			EventKey AS eventKey,
+  			Ticket AS ticket
+  		FROM wechat_qrcode_event 
+  		WHERE FromUserName = #{openId, jdbcType=VARCHAR} AND Event = 'subscribe' ORDER BY Id DESC limit 1
+  </select>
+  
+  <select id="getWechatUser" parameterType="string" resultType="replyMessage">
+  		SELECT wr.Id,wr.name AS wechatName,
+		  		wr.type AS messageType,
+		  		wr.channel,
+		  		wr.text,
+		  		wr.Title,
+		  		wr.Description,
+		  		wr.PicUrl,
+		  		wr.Url,
+		  		wr.createTime,
+		  		wq.EventKey as eventKey
+	  	 FROM 
+	  		wechat_replymessage wr 
+	  	JOIN 
+	  		wechat_qrcode_event wq ON (wr.channel = wq.EventKey) 
+	  	WHERE FromUserName = #{openId, jdbcType=VARCHAR} 
+	  				AND Event = 'subscribe' 
+	  				ORDER BY wq.Id DESC
+  </select>
+  
+   <select id="getReplyMessage" parameterType="string" resultType="replyMessage">
+  		 SELECT Id,
+  				name AS wechatName,
+		  		type AS messageType,
+		  		channel,
+		  		text,
+		  		Title,
+		  		Description,
+		  		PicUrl,
+		  		Url,
+		  		createTime
+	  	 FROM 
+	  		wechat_replymessage WHERE channel = #{param, jdbcType=VARCHAR} ORDER BY Id DESC limit 1
+  </select>
+  
+  
+</mapper>

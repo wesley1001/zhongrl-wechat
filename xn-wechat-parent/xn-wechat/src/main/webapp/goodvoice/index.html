@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>钱罐子好声音</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<meta name="apple-mobile-web-app-capable" content="yes" /><!-- 删除苹果默认的工具栏和菜单栏 -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" /><!-- 设置苹果工具栏颜色 -->
+	<meta name="format-detection" content="telphone=no, email=no" /><!-- 忽略页面中的数字识别为电话，忽略email识别 -->
+	<link rel="stylesheet" href="css/style.pack.css?v=0ad2ee0bd955c436042124459538ee6d"/>
+</head>
+<body>
+	<section>
+		<div class="wrap main-bg1">
+			<div id="suiji">
+				<h3 class="pop-slogan">我因帅过周杰伦，被邀请去台湾小巨蛋开演唱会</h3>
+				<div class="photo-box">
+					<div class="photo-img">
+						<div class="photo-mask1"></div>
+						<img src="http://wx.xiaoniuapp.com/xn-wechat-activity/goodvoice/images/photo-1.jpg" />
+					</div>
+					<span class="lrg-mic"></span>
+				</div>
+				<dl class="leader clearfix">
+					<dt><b><img src="images/photo-small-1.png" /></b></dt>
+					<dd>哎哟不错哦<br />还想帅过杰伦<br />不好意思我们转错了</dd>
+				</dl>
+			</div>
+			<footer>
+				<div class="upon"><img id="upon" src="images/btn1.png" /></div>
+				<div class="num-total">已有 <span id="click">66666</span>人由此登上好声音舞台</div>
+				<div class="f-slogan"><a href="http://mp.weixin.qq.com/s?__biz=MzI0MzAxNDA1MQ==&mid=207572682&idx=1&sn=60868e6cf6c053ff8d5353f5d5584281">人丑就该多唱歌，长得丑点这里！</a></div>
+			</footer>
+			<div class="f_ss">
+				<em class="ico_ss"><img src="images/ico-logo.png" /></em>
+				<div class="tx1">活期收益高达<span>11</span>%</div>
+				<a href="http://m1.xiaoniuapp.com/" class="tx2">点击下载</a>
+				<em class="closed"></em>
+			</div>
+		</div>
+	</section>
+	<script type="text/javascript" src="./js/xn.base.pack.js?v=73ae08eac31b3a5178ca0c6724e52f71"></script>
+	<script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js?v=1439008560554"></script>
+	<script type="text/javascript">
+		$(function(){
+			//接收页面跳转来的参数
+			function getParameter(name, url) {
+				var r = new RegExp("(\x92?|#|&)" + name + "=([^&#?]*)(&|#|\x92?|$)"),
+					m = (url || location.href).match(r);
+				return decodeURIComponent(!m ? "" : m[2]);
+			}
+			//初始化页面信息
+			var pageIndex = getParameter("pageIndex");
+			if(pageIndex){
+				$("#suiji").html(configParams.pages[pageIndex]);
+			}
+			//初始化个人图像
+			var mysrc = getParameter("mysrc");
+			if(mysrc){
+				$("div.photo-img img").attr("src",mysrc);
+			}
+			//获取点击次数
+			$.ajax({
+				type : "get",
+				dataType : 'json',
+				url : 'http://wx.xiaoniuapp.com/xn-wechat-activity/activity/recordClickNumber',
+				success : function(ret){
+					if(ret && ret.code == 0 && ret.data){
+						$("#click").text(ret.data.showClickNumber);
+					}
+				}
+			});
+			//初始化微信接口
+			$.ajax({
+				type : "post",
+				dataType : 'json',
+				url : 'http://wx.xiaoniuapp.com/xn-wechat-activity/activity/signatureVerification',
+				data : {
+					url : location.href.replace(/#.+$/, '')
+				},
+				success : function(ret){
+					if(ret && ret.code == 0){
+						wx.config({
+							//debug : true, //调试
+							appId : ret.data.appId,
+							timestamp : ret.data.timestamp,
+							nonceStr : ret.data.noncestr,
+							signature : ret.data.signature,
+							jsApiList : ['showOptionMenu','onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ']
+						});
+						wx.ready(function(){
+							wx.showOptionMenu();
+							var tit = $(".pop-slogan").text();
+							var img = $("div.photo-img img").attr("src");
+							var des = $("dd").text().replace("<br />","");
+							//设置分享内容
+							var sharedata = {
+								title: tit,  
+								imgUrl: img
+							};
+							var share  = $.extend(sharedata,{desc: des});
+							wx.onMenuShareTimeline(sharedata);
+							wx.onMenuShareAppMessage(share);
+							wx.onMenuShareQQ(share);
+						});
+						/*wx.error(function (res) {
+							alert(res.errMsg);
+						});*/
+					}
+				}
+			});	
+		});
+		$("#upon").on("touchstart",function(){
+			window.location.href="./index2.html";
+		});
+		$(".closed").on("touchstart",function(){
+			$(".f_ss").addClass("dn");
+			return false;
+		});
+	</script>
+</body>
+</html>

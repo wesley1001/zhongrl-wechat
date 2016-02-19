@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xn.wechat.activity.mapper.ShareLogMapper">
+
+
+	<insert id="add" parameterType="cn.xn.wechat.activity.model.ShareLog">
+		insert into
+		t_wechat_share_log
+		(userId,ipAddress,createDate,
+		content,activityType)
+		values
+		(#{userId},#{ipAddress},now(),#{content},#{activityType})
+	</insert>
+	
+</mapper>

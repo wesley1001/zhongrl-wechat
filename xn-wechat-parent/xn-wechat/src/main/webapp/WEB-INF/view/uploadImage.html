@@ -1,0 +1,85 @@
+
+<html>
+<head>
+<script type="text/javascript">
+		var path = "/xn-wechat-activity"; 
+		var image = '';
+		function selectImage(file) {
+			if (!file.files || !file.files[0]) {
+				return;
+			}
+			var reader = new FileReader();
+			reader.onload = function(evt) {
+				document.getElementById('image').src = evt.target.result;
+				image = evt.target.result;
+			}
+			reader.readAsDataURL(file.files[0]);
+		}
+		function uploadImage() {
+
+			$.ajax({
+
+				type : 'POST',
+				url : path + '/activity/uploadImage',
+				data : {
+					image : image
+				},
+				async : false,
+				dataType : 'json',
+				success : function(data) {
+					alert(data.data.imageUrl);
+				},
+
+				error : function(err) {
+
+					alert('失败1111');
+
+				}
+
+			});
+
+		}
+		function getRootPath(){
+		    var curWwwPath=window.document.location.href;
+		    var pathName=window.document.location.pathname;
+		    var pos=curWwwPath.indexOf(pathName);
+		    var localhostPaht=curWwwPath.substring(0,pos);
+		    var projectName=pathName.substring(0,pathName.substr(1).indexOf('/')+1);
+		    return(localhostPaht+projectName);
+		}
+		
+		/* (function() {
+			var urlPath = getRootPath();
+			var jsfiles = new Array(urlPath+"/static/js/jquery.min.js");         
+			var agent = navigator.userAgent;        
+			var docWrite = (agent.match("MSIE") || agent.match("Safari"));        
+			if(docWrite) {
+				var allScriptTags = new Array(jsfiles.length);
+			}        
+			var host = "lib/";    
+			for (var i=0, len=jsfiles.length; i<len; i++) {
+				if (docWrite) {
+					allScriptTags[i] = "<script src="+ host + jsfiles[i] +"><\\/script>";
+					alert(allScriptTags[i]);
+				} else {                
+					var s = document.createElement("script");
+					s.src = host + jsfiles[i];
+					var h = document.getElementsByTagName("head").length ? document.getElementsByTagName("head")[0] : document.body;
+					                h.appendChild(s);            
+				}        
+			}        
+			if (docWrite) {
+			   document.write(allScriptTags.join(""));
+			}
+			})(); */
+	</script>
+</head>
+<body>
+	<img id="image" src="" />
+	<br />
+	<input type="file" onchange="selectImage(this);" />
+	<br />
+	<input type="button" onclick="uploadImage();" value="提交" />
+</body>
+<script src="/xn-wechat-activity/static/js/jquery.min.js" type="text/javascript"></script>
+</html>
